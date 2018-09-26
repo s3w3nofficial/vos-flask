@@ -1,0 +1,7 @@
+*.css
+*.map
+*.db
+pyenv/
+__pycache__/
+.vscode/
+static/images/*

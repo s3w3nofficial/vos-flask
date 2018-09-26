@@ -1,0 +1,99 @@
+$black: #212121;
+$gray: #dedede;
+
+.btn-primary {
+    background-color: #f41138;
+    color: #fff;
+    padding: 13px 27px;
+    font-size: 90%;
+    letter-spacing: 4px;
+    display: inline-block;
+    font-weight: bold;
+    border-width: 0;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: .3s;
+    border-radius: 0;
+
+    &:hover {
+        background-color: #f41138;
+    }
+
+    &:focus {
+        outline: 0;
+        box-shadow: none;
+    }
+
+    &:active {
+        background-color: #f41138;
+    }
+}
+
+.btn-primary:not([disabled]):not(.disabled).active:focus, .btn-primary:not([disabled]):not(.disabled):active:focus, .show>.btn-primary.dropdown-toggle:focus {
+    box-shadow: none;
+    background-color: #f41138
+}
+
+header {
+    height: 800px;
+    background: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22800%22%20height%3D%22400%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20800%20400%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_16302770b65%20text%20%7B%20fill%3A%23555%3Bfont-weight%3Anormal%3Bfont-family%3AHelvetica%2C%20monospace%3Bfont-size%3A40pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_16302770b65%22%3E%3Crect%20width%3D%22800%22%20height%3D%22400%22%20fill%3D%22%23777%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22285.921875%22%20y%3D%22217.7%22%3EFirst%20slide%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+    background-size: cover;
+}
+
+main {
+    padding: 60px 0;
+    h1 {
+        text-align: center;
+        font-size: 26px;
+    }
+}
+
+.data {
+    padding: 60px 0;
+    background: $black;
+    height: 360px;
+}
+
+.about {
+    padding: 60px 0;
+    .right {
+        padding: 160px 60px 20px 60px;
+        background: $gray;
+        text-align: center;
+
+        p {
+            padding-top: 40px;
+            font-size: 18px;
+        }
+        
+        button {
+            margin-top: 40px;
+        }
+    }
+}
+
+.slogan {
+    text-align: center;
+    padding: 80px 0;
+    background: $gray;
+
+    h1 {
+        font-size: 56px;
+    }
+
+    button {
+        margin-top: 20px;
+    }
+}
+
+.photo {
+    padding: 80px 0;
+    text-align: center;
+}
+
+footer {
+    text-align: center;
+    padding: 60px 0;
+    background: $black;
+    color: white;
+}
