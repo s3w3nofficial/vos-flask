@@ -1,0 +1,11 @@
+{% extends 'admin/base.html' %}
+{% block main %}
+<h1>File Input</h1>
+<form method="POST" action="/admin/upload" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="iputFile">File input</label>
+        <input type="file" name="inputFile" multiple>
+    </div>
+    <button type="submit">Submit</button>
+</form>
+{% endblock %}

@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -16,7 +16,7 @@ class Image(db.Model):
     description = db.Column(db.String(3000))
     url = db.Column(db.String(300))
 
-    voting_id = db.Column(db.Integer, db.ForeignKey('album.id'))
+    album_id = db.Column(db.Integer, db.ForeignKey('album.id'))
 
 class Album(db.Model):
     __tablename__ = 'album'
@@ -41,29 +41,78 @@ def image(id):
     img = Image.query.get(id)
     return render_template('image.html', data=img)
 
-@app.route('/admin/upload')
+@app.route('/admin/upload', methods=['GET', 'POST'])
 def admin_upload():
-    return render_template('admin/index.html')
+    if request.method == 'POST':
+        target = os.path.join(APP_ROOT, 'static/images/')
+        if not os.path.isdir(target):
+            os.mkdir(target)
 
-@app.route('/upload', methods=['POST'])
-def upload():
-    target = os.path.join(APP_ROOT, 'static/images/')
+        for file in request.files.getlist('inputFile'):
+            print(file)
+            filename = file.filename
+            destination = '/'.join([target, filename])
+            print(destination)
+            newFile = Image(name=file.filename, url='/static/images/' + filename, description="")
+            db.session.add(newFile)
+            file.save(destination)
 
-    if not os.path.isdir(target):
-        os.mkdir(target)
+        db.session.commit()
 
-    for file in request.files.getlist('inputFile'):
-        print(file)
-        filename = file.filename
-        destination = '/'.join([target, filename])
-        print(destination)
-        newFile = Image(name=file.filename, url='/static/images/' + filename, description="")
-        db.session.add(newFile)
-        file.save(destination)
+        return redirect('/gallery')
+    else:
+        return render_template('admin/upload_image.html')
 
-    db.session.commit()
+@app.route('/admin/image')
+def admin_images():
+    data = db.session.query(Image).all()
+    return render_template('admin/image.html', data=data)
 
-    return "Success"
+@app.route('/admin/image/<int:id>', methods=['GET', 'POST'])
+def admin_image(id):
+    if request.method == 'POST':
+        image = Image.query.get(id)
+        db.session.delete(image)
+        db.session.commit()
+        return redirect('/admin/image')
+    else:
+        return redirect('/admin/image')
 
+@app.route('/admin/album_upload', methods=['GET', 'POST'])
+def admin_album():
+    if request.method == 'POST':
+        target = os.path.join(APP_ROOT, 'static/images/')
+        if not os.path.isdir(target):
+            os.mkdir(target)
+
+        album = Album(name=request.form.get('name'), description=request.form.get('description'))
+        for file in request.files.getlist('inputFile'):
+            print(file)
+            filename = file.filename
+            destination = '/'.join([target, filename])
+            print(destination)
+            newFile = Image(name=file.filename, url='/static/images/' + filename, description="")
+            album.gallery_image.append(newFile)
+            file.save(destination)
+        db.session.add(album)
+        db.session.commit()
+
+        return redirect('/gallery')
+    else:
+        return render_template('admin/upload_album.html')
+
+@app.route('/admin/album')
+def admin_albums():
+    data = db.session.query(Album).all()
+    new_data = []
+    for item in data:
+        tmp = {}
+        tmp['id'] = item.id
+        tmp['name'] = item.name
+        tmp['description'] = item.description
+        tmp['count'] = len(item.gallery_image)
+        new_data.append(tmp)
+        
+    return render_template('admin/album.html', data=new_data)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5900, debug=True)

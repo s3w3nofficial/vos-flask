@@ -1,0 +1,29 @@
+{% extends 'admin/base.html' %}
+{% block main %}
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Název</th>
+                <th>URL</th>
+                <th>Popisek</th>
+                <th>Album</th>
+                <th>Akce</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.name}}</td>
+                <td>{{ item.url }}</td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.album_id }}</td>
+                <td><form method="POST" action="/admin/image/{{ item.id }}"><button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i></button></form></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
