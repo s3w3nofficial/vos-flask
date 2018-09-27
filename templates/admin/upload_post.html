@@ -1,0 +1,17 @@
+{% extends 'admin/base.html' %}
+{% block main %}
+<h1>Nový Článek</h1>
+<div class="container">
+    <form method="POST" action="/admin/post_upload" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="name">Nadpis</label>
+          <input type="text" class="form-control" name="name" placeholder="">
+        </div>
+        <div class="form-group">
+          <label for="content">Obsah</label>
+          <textarea class="form-control" name="content" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Odeslat</button>
+    </form>
+</div>
+{% endblock %}

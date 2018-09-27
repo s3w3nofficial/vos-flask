@@ -1,4 +1,4 @@
-import os
+import os, datetime
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 
@@ -17,6 +17,7 @@ class Image(db.Model):
     url = db.Column(db.String(300))
 
     album_id = db.Column(db.Integer, db.ForeignKey('album.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
 
 class Album(db.Model):
     __tablename__ = 'album'
@@ -26,6 +27,18 @@ class Album(db.Model):
     description = db.Column(db.String(3000))
 
     gallery_image = db.relationship('Image', backref='album', lazy=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+
+class Post(db.Model):
+    __tablename__ = 'post'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(300))
+    content = db.Column(db.String(3000))
+    create_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
+    gallery_image = db.relationship('Image', backref='post', lazy=True)
+    album = db.relationship('Album', backref='post', lazy=True)
 
 @app.route('/')
 def index():
@@ -66,7 +79,7 @@ def admin_image_upload():
 @app.route('/admin/image')
 def admin_images():
     data = db.session.query(Image).all()
-    return render_template('admin/image.html', data=data)
+    return render_template('admin/images.html', data=data)
 
 @app.route('/admin/image/<int:id>', methods=['GET', 'POST'])
 def admin_image(id):
@@ -74,9 +87,9 @@ def admin_image(id):
         image = Image.query.get(id)
         db.session.delete(image)
         db.session.commit()
-        return redirect('/admin/images')
+        return redirect('/admin/image')
     else:
-        return redirect('/admin/images')
+        return redirect('/admin/image')
 
 @app.route('/admin/album_upload', methods=['GET', 'POST'])
 def admin_album_upload():
@@ -122,6 +135,21 @@ def admin_album(id):
     else:
         data = Album.query.get(id)
         return render_template('admin/album.html', data=data)
+
+@app.route('/admin/post')
+def admin_posts():
+    data = db.session.query(Post).all()
+    return render_template('admin/posts.html', data=data)
+
+@app.route('/admin/post_upload', methods=['GET', 'POST'])
+def admin_post_upload():
+    if request.method == 'POST':
+        post = Post(name=request.form.get('name'), content=request.form.get('content'))
+        db.session.add(post)
+        db.session.commit()
+        return redirect('/admin/post')
+    else:
+        return render_template('admin/upload_post.html')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5900, debug=True)
