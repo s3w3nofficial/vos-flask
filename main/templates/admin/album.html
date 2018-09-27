@@ -4,6 +4,14 @@
     <h1>{{ data.id }}</h1>
     <h2>{{ data.name }}</h2>
     <p>{{ data.description }}</p>
+    <form action="/admin/album" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="album_id" value="{{ data.id }}">
+        <div class="form-group">
+            <label for="inputFile">Vložte soubor</label>
+            <input type="file" name="inputFile" multiple>
+        </div>
+        <button class="btn btn-primary" type="submit">Odeslat</button>
+    </form>
     <div class="row">
         {% for item in data.gallery_image %}
         <div class="col-md-3">

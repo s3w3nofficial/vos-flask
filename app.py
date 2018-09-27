@@ -83,19 +83,38 @@ def admin_album_upload():
     else:
         return render_template('admin/upload_album.html')
 
-@app.route('/admin/album')
+@app.route('/admin/album', methods=['GET','POST'])
 def admin_albums():
-    data = db.session.query(Album).all()
-    new_data = []
-    for item in data:
-        tmp = {}
-        tmp['id'] = item.id
-        tmp['name'] = item.name
-        tmp['description'] = item.description
-        tmp['count'] = len(item.gallery_image)
-        new_data.append(tmp)
-        
-    return render_template('admin/albums.html', data=new_data)
+    if request.method == 'POST':
+        target = os.path.join(APP_ROOT, 'main/static/images/')
+        if not os.path.isdir(target):
+            os.mkdir(target)
+
+        album = Album.query.get(request.form.get('album_id'))
+
+        print(request.files.getlist('inputFile'))
+        for file in request.files.getlist('inputFile'):
+            print(file)
+            filename = file.filename
+            destination = '/'.join([target, filename])
+            print(destination)
+            newFile = Image(name=file.filename, url='/static/images/' + filename, description="")
+            album.gallery_image.append(newFile)
+            file.save(destination)
+        db.session.commit()
+        return redirect('/admin/album')
+    else:
+        data = db.session.query(Album).all()
+        new_data = []
+        for item in data:
+            tmp = {}
+            tmp['id'] = item.id
+            tmp['name'] = item.name
+            tmp['description'] = item.description
+            tmp['count'] = len(item.gallery_image)
+            new_data.append(tmp)
+            
+        return render_template('admin/albums.html', data=new_data)
 
 @app.route('/admin/album/<int:id>', methods=['GET', 'POST'])
 def admin_album(id):
