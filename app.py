@@ -1,44 +1,13 @@
-import os, datetime
+import os
 from flask import Flask, render_template, request, redirect
-from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///storage.db'
-db = SQLAlchemy(app)
+from main.model.image import Image
+from main.model.album import Album
+from main.model.post import Post
+
+from main import app, db
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-
-class Image(db.Model):
-    __tablename__ = 'image'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(300))
-    description = db.Column(db.String(3000))
-    url = db.Column(db.String(300))
-
-    album_id = db.Column(db.Integer, db.ForeignKey('album.id'))
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
-
-class Album(db.Model):
-    __tablename__ = 'album'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(300))
-    description = db.Column(db.String(3000))
-
-    gallery_image = db.relationship('Image', backref='album', lazy=True)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
-
-class Post(db.Model):
-    __tablename__ = 'post'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(300))
-    content = db.Column(db.String(3000))
-    create_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-    
-    gallery_image = db.relationship('Image', backref='post', lazy=True)
-    album = db.relationship('Album', backref='post', lazy=True)
 
 @app.route('/')
 def index():
