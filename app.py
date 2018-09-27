@@ -26,7 +26,7 @@ def image(id):
 @app.route('/admin/upload', methods=['GET', 'POST'])
 def admin_image_upload():
     if request.method == 'POST':
-        target = os.path.join(APP_ROOT, 'static/images/')
+        target = os.path.join(APP_ROOT, 'main/static/images/')
         if not os.path.isdir(target):
             os.mkdir(target)
 
@@ -63,7 +63,7 @@ def admin_image(id):
 @app.route('/admin/album_upload', methods=['GET', 'POST'])
 def admin_album_upload():
     if request.method == 'POST':
-        target = os.path.join(APP_ROOT, 'static/images/')
+        target = os.path.join(APP_ROOT, 'main/static/images/')
         if not os.path.isdir(target):
             os.mkdir(target)
 
