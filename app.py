@@ -42,7 +42,7 @@ def image(id):
     return render_template('image.html', data=img)
 
 @app.route('/admin/upload', methods=['GET', 'POST'])
-def admin_upload():
+def admin_image_upload():
     if request.method == 'POST':
         target = os.path.join(APP_ROOT, 'static/images/')
         if not os.path.isdir(target):
@@ -74,12 +74,12 @@ def admin_image(id):
         image = Image.query.get(id)
         db.session.delete(image)
         db.session.commit()
-        return redirect('/admin/image')
+        return redirect('/admin/images')
     else:
-        return redirect('/admin/image')
+        return redirect('/admin/images')
 
 @app.route('/admin/album_upload', methods=['GET', 'POST'])
-def admin_album():
+def admin_album_upload():
     if request.method == 'POST':
         target = os.path.join(APP_ROOT, 'static/images/')
         if not os.path.isdir(target):
@@ -113,6 +113,15 @@ def admin_albums():
         tmp['count'] = len(item.gallery_image)
         new_data.append(tmp)
         
-    return render_template('admin/album.html', data=new_data)
+    return render_template('admin/albums.html', data=new_data)
+
+@app.route('/admin/album/<int:id>', methods=['GET', 'POST'])
+def admin_album(id):
+    if request.method == 'POST':
+        pass
+    else:
+        data = Album.query.get(id)
+        return render_template('admin/album.html', data=data)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5900, debug=True)
