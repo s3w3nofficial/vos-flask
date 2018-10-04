@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, redirect
 from main.model.image import Image
 from main.model.album import Album
 from main.model.post import Post
+from main.model.user import User
 
 from main import app, db
 
@@ -12,6 +13,11 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/blog')
+def blog():
+    data = db.session.query(Post).all()
+    return render_template('blog.html', data=data)
 
 @app.route('/gallery')
 def gallery():

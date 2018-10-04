@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block main %}
+{% for item in data %}
+<div class="container text-center">
+    <hr>
+    {{ item.content|safe }}
+    <small>{{ item.create_date }}</small>
+</div>
+{% endfor %}
+{% endblock %}
