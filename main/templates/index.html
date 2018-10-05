@@ -2,7 +2,7 @@
 {% block main %}
 <main>
     <div class="cotnainer">
-        <h1>ZACHYTÍM VÁŠ PŘÍBĚH, JSEM...</h1>
+        <h1>ZACHYTÍM VÁŠ PŘÍBĚH, JSEM... {% if wrong_username %}USERNAME WRONG {% endif %} {% if wrong_password %}PASSWD WRONG{% endif %}</h1>
     </div>
 </main>
 

@@ -1,4 +1,4 @@
-import os
+import os, hashlib
 from flask import Flask, render_template, request, redirect
 
 from main.model.image import Image
@@ -9,10 +9,33 @@ from main.model.user import User
 from main import app, db
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+app.config['SECRET_KEY'] = b'ba1db3e47439b1365fd60f0335ad22e3'
 
-@app.route('/')
+@app.route('/', methods=['GET','POST'])
 def index():
-    return render_template('index.html')
+    wrong_username = None
+    wrong_password = None
+    if request.method == 'POST':
+        atempt_usr = request.form.get('usrname')
+        atempt_pwd = hashlib.sha256(request.form.get('pwd').encode()).hexdigest()
+        data = db.session.query(User).all()
+        for user in data:
+            if atempt_usr == user.username:
+                print('USR OK')
+            elif not atempt_usr == user.username:
+                wrong_username = True
+                return render_template('index.html', wrong_username=wrong_username)
+            if atempt_pwd == user.password:
+                    print('PWD OK')
+                    return redirect('/admin/post')
+            elif not atempt_pwd == user.password:
+                    wrong_password = True
+                    return render_template('index.html', wrong_password=wrong_password)
+            else: 
+                return render_template('index.html')
+        return render_template('index.html')
+    else:
+        return render_template('index.html')
 
 @app.route('/blog')
 def blog():
@@ -69,11 +92,12 @@ def admin_image(id):
 @app.route('/admin/album_upload', methods=['GET', 'POST'])
 def admin_album_upload():
     if request.method == 'POST':
-        target = os.path.join(APP_ROOT, 'main/static/images/')
+        alb_name = request.form.get('name')
+        target = os.path.join(APP_ROOT, 'main/static/images/' + alb_name + '/')
         if not os.path.isdir(target):
             os.mkdir(target)
 
-        album = Album(name=request.form.get('name'), description=request.form.get('description'))
+        album = Album(name=alb_name, description=request.form.get('description'))
         for file in request.files.getlist('inputFile'):
             print(file)
             filename = file.filename
