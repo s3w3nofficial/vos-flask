@@ -1,4 +1,4 @@
-import os, hashlib
+import os, hashlib, shutil
 from flask import Flask, render_template, request, redirect
 
 from main.model.image import Image
@@ -115,41 +115,29 @@ def admin_album_upload():
 
 @app.route('/admin/album', methods=['GET','POST'])
 def admin_albums():
-    if request.method == 'POST':
-        target = os.path.join(APP_ROOT, 'main/static/images/')
-        if not os.path.isdir(target):
-            os.mkdir(target)
-
-        album = Album.query.get(request.form.get('album_id'))
-
-        print(request.files.getlist('inputFile'))
-        for file in request.files.getlist('inputFile'):
-            print(file)
-            filename = file.filename
-            destination = '/'.join([target, filename])
-            print(destination)
-            newFile = Image(name=file.filename, url='/static/images/' + filename, description="")
-            album.gallery_image.append(newFile)
-            file.save(destination)
-        db.session.commit()
-        return redirect('/admin/album')
-    else:
-        data = db.session.query(Album).all()
-        new_data = []
-        for item in data:
-            tmp = {}
-            tmp['id'] = item.id
-            tmp['name'] = item.name
-            tmp['description'] = item.description
-            tmp['count'] = len(item.gallery_image)
-            new_data.append(tmp)
-            
-        return render_template('admin/albums.html', data=new_data)
+    data = db.session.query(Album).all()
+    new_data = []
+    for item in data:
+        tmp = {}
+        tmp['id'] = item.id
+        tmp['name'] = item.name
+        tmp['description'] = item.description
+        tmp['count'] = len(item.gallery_image)
+        new_data.append(tmp)
+    return render_template('admin/albums.html', data=new_data)
 
 @app.route('/admin/album/<int:id>', methods=['GET', 'POST'])
 def admin_album(id):
     if request.method == 'POST':
-        pass
+        album = Album.query.get(id)
+        target = os.path.join(APP_ROOT, 'main/static/images/' + album.name + '/')
+        alb_images = Image.query.get(album.gallery_image).all()
+        images = Image.query.get(id).all()
+        db.session.delete(images)
+                
+        db.session.commit()
+        shutil.rmtree(target)
+        return redirect('/admin/album')
     else:
         data = Album.query.get(id)
         return render_template('admin/album.html', data=data)
