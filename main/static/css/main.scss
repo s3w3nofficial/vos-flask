@@ -32,6 +32,9 @@ $gray: #dedede;
 .btn-primary:not([disabled]):not(.disabled).active:focus, .btn-primary:not([disabled]):not(.disabled):active:focus, .show>.btn-primary.dropdown-toggle:focus {
     box-shadow: none;
     background-color: #f41138
+} 
+nav {
+    max-height: 55px;
 }
 
 header {

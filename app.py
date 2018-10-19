@@ -1,41 +1,47 @@
 import os, hashlib, shutil
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify, flash, abort
+from flask_login import LoginManager, login_user, login_required ,logout_user, UserMixin
 
 from main.model.image import Image
 from main.model.album import Album
 from main.model.post import Post
 from main.model.user import User
 
-from main import app, db
+from main import app, db, login_manager
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 app.config['SECRET_KEY'] = b'ba1db3e47439b1365fd60f0335ad22e3'
 
-@app.route('/', methods=['GET','POST'])
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@app.route('/')
 def index():
-    wrong_username = None
-    wrong_password = None
+    return render_template('index.html')
+
+
+@app.route('/login', methods=['POST','GET'])
+def login():
     if request.method == 'POST':
         atempt_usr = request.form.get('usrname')
-        atempt_pwd = hashlib.sha256(request.form.get('pwd').encode()).hexdigest()
-        data = db.session.query(User).all()
-        for user in data:
-            if atempt_usr == user.username:
-                print('USR OK')
-            elif not atempt_usr == user.username:
-                wrong_username = True
-                return render_template('index.html', wrong_username=wrong_username)
+        user = db.session.query(User).filter_by(username=atempt_usr).first()
+        if not user == None:
+            atempt_pwd = hashlib.sha256(request.form.get('pwd').encode() + user.salt.encode()).hexdigest()
             if atempt_pwd == user.password:
-                    print('PWD OK')
-                    return redirect('/admin/post')
-            elif not atempt_pwd == user.password:
-                    wrong_password = True
-                    return render_template('index.html', wrong_password=wrong_password)
-            else: 
-                return render_template('index.html')
-        return render_template('index.html')
-    else:
-        return render_template('index.html')
+                login_user(user)
+                return redirect('/admin/post')
+            else:
+                return abort(401)
+        else:
+            return abort(401)
+    return 'Rekni mi o co se jako snazis'
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/')
 
 @app.route('/blog')
 def blog():
@@ -53,6 +59,7 @@ def image(id):
     return render_template('image.html', data=img)
 
 @app.route('/admin/upload', methods=['GET', 'POST'])
+@login_required
 def admin_image_upload():
     if request.method == 'POST':
         target = os.path.join(APP_ROOT, 'main/static/images/')
@@ -75,6 +82,7 @@ def admin_image_upload():
         return render_template('admin/upload_image.html')
 
 @app.route('/admin/image')
+@login_required
 def admin_images():
     data = db.session.query(Image).all()
     return render_template('admin/images.html', data=data)
@@ -90,6 +98,7 @@ def admin_image(id):
         return redirect('/admin/image')
 
 @app.route('/admin/album_upload', methods=['GET', 'POST'])
+@login_required
 def admin_album_upload():
     if request.method == 'POST':
         alb_name = request.form.get('name')
@@ -103,7 +112,7 @@ def admin_album_upload():
             filename = file.filename
             destination = '/'.join([target, filename])
             print(destination)
-            newFile = Image(name=file.filename, url='/static/images/' + filename, description="")
+            newFile = Image(name=file.filename, url='/static/images/' + alb_name + '/' + filename, description="")
             album.gallery_image.append(newFile)
             file.save(destination)
         db.session.add(album)
@@ -114,6 +123,7 @@ def admin_album_upload():
         return render_template('admin/upload_album.html')
 
 @app.route('/admin/album', methods=['GET','POST'])
+@login_required
 def admin_albums():
     data = db.session.query(Album).all()
     new_data = []
@@ -127,15 +137,14 @@ def admin_albums():
     return render_template('admin/albums.html', data=new_data)
 
 @app.route('/admin/album/<int:id>', methods=['GET', 'POST'])
+@login_required
 def admin_album(id):
     if request.method == 'POST':
         album = Album.query.get(id)
-        target = os.path.join(APP_ROOT, 'main/static/images/' + album.name + '/')
-        alb_images = Image.query.get(album.gallery_image).all()
-        images = Image.query.get(id).all()
-        db.session.delete(images)
-                
+        alb_images = db.session.query(Image).filter_by(album_id=id).delete()
+        db.session.delete(album)
         db.session.commit()
+        target = os.path.join(APP_ROOT, 'main/static/images/' + album.name + '/')
         shutil.rmtree(target)
         return redirect('/admin/album')
     else:
@@ -143,11 +152,13 @@ def admin_album(id):
         return render_template('admin/album.html', data=data)
 
 @app.route('/admin/post')
+@login_required
 def admin_posts():
     data = db.session.query(Post).all()
     return render_template('admin/posts.html', data=data)
 
 @app.route('/admin/post_upload', methods=['GET', 'POST'])
+@login_required
 def admin_post_upload():
     if request.method == 'POST':
         post = Post(name=request.form.get('name'), content=request.form.get('content'))
