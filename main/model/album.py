@@ -7,5 +7,5 @@ class Album(db.Model):
     name = db.Column(db.String(300))
     description = db.Column(db.String(3000))
     
-    gallery_image = db.relationship('Image', backref='album', lazy=True, foreign_keys=["Image.id"])
+    gallery_image = db.relationship('Image', backref='album', lazy=True)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))

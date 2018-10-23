@@ -22,7 +22,7 @@
                 <td>{{ item.name }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.count }}</td>
-                <td><form method="POST" action="/admin/album/{{ item.id }}"><button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i></button></form></td>
+                <td><form method="POST" action="/admin/album/{{ item.id }}/d"><button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i></button></form></td>
             </tr>
             {% endfor %}
         </tbody>

@@ -24,17 +24,21 @@ def index():
 @app.route('/login', methods=['POST','GET'])
 def login():
     if request.method == 'POST':
-        atempt_usr = request.form.get('usrname')
+        print(request.json)
+        atempt_usr = request.json.get("username")
         user = db.session.query(User).filter_by(username=atempt_usr).first()
         if not user == None:
-            atempt_pwd = hashlib.sha256(request.form.get('pwd').encode() + user.salt.encode()).hexdigest()
-            if atempt_pwd == user.password:
-                login_user(user)
-                return redirect('/admin/post')
+            if not request.json.get("password") == None:
+                atempt_pwd = hashlib.sha256(request.json.get("password").encode() + user.salt.encode()).hexdigest()
+                if atempt_pwd == user.password:
+                    login_user(user)
+                    return jsonify({"status":"success"})
+                else:
+                    return jsonify({"status":"Chybně zadané heslo"})
             else:
-                return abort(401)
+                return jsonify({"status":"Something went wrong "})
         else:
-            return abort(401)
+            return jsonify({"status":"Chybně zadané jméno"})
     return 'Rekni mi o co se jako snazis'
 
 @app.route('/logout')
@@ -87,15 +91,38 @@ def admin_images():
     data = db.session.query(Image).all()
     return render_template('admin/images.html', data=data)
 
-@app.route('/admin/image/<int:id>', methods=['GET', 'POST'])
-def admin_image(id):
+@app.route('/admin/image/<int:id>/a', methods=['GET', 'POST'])
+@login_required
+def admin_image_add(id):
+    if request.method == 'POST':
+        album = Album.query.get(id)
+        target = os.path.join(APP_ROOT, 'main/static/images/' + album.name + '/')
+        for file in request.files.getlist('inputFile'):
+            print(file)
+            filename = file.filename
+            destination = '/'.join([target, filename])
+            print(destination)
+            newFile = Image(name=file.filename, url='/static/images/' + album.name + '/' + filename, description="")
+            album.gallery_image.append(newFile)
+            file.save(destination)
+        db.session.commit()
+        return redirect('/admin/album/{}'.format(album.id))
+    return
+
+
+@app.route('/admin/image/<int:id>/d', methods=['GET', 'POST'])
+@login_required
+def admin_image_remove(id):
     if request.method == 'POST':
         image = Image.query.get(id)
+        album = Album.query.get(image.album_id)
+        target = os.path.join(APP_ROOT, 'main/static/images/' + album.name + '/' + image.name)
         db.session.delete(image)
         db.session.commit()
-        return redirect('/admin/image')
+        os.remove(target)
+        return redirect('/admin/album/{}'.format(image.album_id))
     else:
-        return redirect('/admin/image')
+        return 'Zde nic nenajdeš'
 
 @app.route('/admin/album_upload', methods=['GET', 'POST'])
 @login_required
@@ -136,9 +163,15 @@ def admin_albums():
         new_data.append(tmp)
     return render_template('admin/albums.html', data=new_data)
 
-@app.route('/admin/album/<int:id>', methods=['GET', 'POST'])
+@app.route('/admin/album/<int:id>')
 @login_required
 def admin_album(id):
+    data = Album.query.get(id)
+    return render_template('admin/album.html', data=data)
+
+@app.route('/admin/album/<int:id>/d', methods=['GET', 'POST'])
+@login_required
+def admin_album_remove(id):
     if request.method == 'POST':
         album = Album.query.get(id)
         alb_images = db.session.query(Image).filter_by(album_id=id).delete()
@@ -148,8 +181,7 @@ def admin_album(id):
         shutil.rmtree(target)
         return redirect('/admin/album')
     else:
-        data = Album.query.get(id)
-        return render_template('admin/album.html', data=data)
+        return 'Jak ses sem dostal'        
 
 @app.route('/admin/post')
 @login_required

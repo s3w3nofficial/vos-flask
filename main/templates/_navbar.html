@@ -48,17 +48,17 @@
               </button>
             </div>
             <div class="modal-body">
-              <form action="/login" method="POST" enctype="multipart/form-data">
+              <div>
                   <div class="form-group">
                     <label for="usrname">Uživatelské jméno</label>
-                    <input type="text" name="usrname" class="form-control" placeholder="Jmeník">
+                    <input id="username" type="text" name="usrname" class="form-control" placeholder="Jmeník">
                   </div>
                   <div class="form-group">
                     <label for="pwd">Heslo</label>
-                    <input type="password" name="pwd" class="form-control" placeholder="HeslumKoksum">
+                    <input id="password" type="password" name="pwd" class="form-control" placeholder="HeslumKoksum">
                   </div>
-                  <button class="btn btn-primary" type="submit">Přihlásit</button>
-              </form>
+                  <button class="btn btn-primary" onclick="javascript:void(0);submit()" type="button">Přihlásit</button>
+                </div>
             </div>
             <!-- <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -66,3 +66,22 @@
         </div>
       </div>
 </header>
+{% block sripts %}
+<script> 
+function submit(){ 
+    let data = {username: $("#username").val(), password: $("#password").val()}
+    fetch('/login',{
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-type': 'application/json'
+        }
+    }).then(res => res.json()).then((res) => {
+        if(res.status == "success"){
+            location.reload()
+        } else {
+            alert(res.status)
+        }
+    })}
+</script>
+{% endblock %}
