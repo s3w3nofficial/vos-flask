@@ -39,7 +39,7 @@ def login():
                 return jsonify({"status":"Something went wrong "})
         else:
             return jsonify({"status":"Chybně zadané jméno"})
-    return 'Rekni mi o co se jako snazis'
+    return abort(404)
 
 @app.route('/logout')
 @login_required
@@ -54,7 +54,7 @@ def blog():
 
 @app.route('/gallery')
 def gallery():
-    data = db.session.query(Image).all()
+    data = db.session.query(Album).all()
     return render_template('gallery.html', data=data)
 
 @app.route('/gallery/<int:id>')
@@ -80,10 +80,9 @@ def admin_image_upload():
             file.save(destination)
 
         db.session.commit()
-
         return redirect('/gallery')
     else:
-        return render_template('admin/upload_image.html')
+        return abort(404)
 
 @app.route('/admin/image')
 @login_required
@@ -107,7 +106,7 @@ def admin_image_add(id):
             file.save(destination)
         db.session.commit()
         return redirect('/admin/album/{}'.format(album.id))
-    return
+    return abort(404)
 
 
 @app.route('/admin/image/<int:id>/d', methods=['GET', 'POST'])
@@ -122,7 +121,7 @@ def admin_image_remove(id):
         os.remove(target)
         return redirect('/admin/album/{}'.format(image.album_id))
     else:
-        return 'Zde nic nenajdeš'
+        return abort(404)
 
 @app.route('/admin/album_upload', methods=['GET', 'POST'])
 @login_required
@@ -181,13 +180,45 @@ def admin_album_remove(id):
         shutil.rmtree(target)
         return redirect('/admin/album')
     else:
-        return 'Jak ses sem dostal'        
+        return abort(404)       
 
-@app.route('/admin/post')
+@app.route('/admin/posts')
 @login_required
 def admin_posts():
     data = db.session.query(Post).all()
     return render_template('admin/posts.html', data=data)
+
+@app.route('/admin/post/<int:id>/d', methods=['GET', 'POST'])
+@login_required
+def admin_post_remove(id):
+    if request.method == 'POST':
+        post = Post.query.get(id)
+        db.session.delete(post)
+        db.session.commit()
+        return redirect('/admin/posts')
+    else:
+        return abort(404)
+
+@app.route('/admin/post/<int:id>',  methods=['GET', 'POST'])
+@login_required
+def admin_post_load(id):
+    data = Post.query.get(id)
+    if request.method == 'POST':
+        return render_template('/admin/edit_post.html', data=data)
+    else:
+        return abort(404)
+
+@app.route('/admin/post/<int:id>/e',  methods=['GET', 'POST'])
+@login_required
+def admin_post_edit(id):
+    data = Post.query.get(id)
+    if request.method == 'POST':
+        data.name = request.form.get('name')
+        data.content = request.form.get('content')
+        db.session.commit()
+        return redirect('/admin/posts')
+    else:
+        return abort(404)
 
 @app.route('/admin/post_upload', methods=['GET', 'POST'])
 @login_required
@@ -196,7 +227,7 @@ def admin_post_upload():
         post = Post(name=request.form.get('name'), content=request.form.get('content'))
         db.session.add(post)
         db.session.commit()
-        return redirect('/admin/post')
+        return redirect('/admin/posts')
     else:
         return render_template('admin/upload_post.html')
 
