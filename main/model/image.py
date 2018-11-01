@@ -7,6 +7,7 @@ class Image(db.Model):
     name = db.Column(db.String(300))
     description = db.Column(db.String(3000))
     url = db.Column(db.String(300))
+    price = db.Column(db.Integer,default=0)
 
-    album_id = db.Column(db.Integer, db.ForeignKey('album.id'))
+    album = db.relationship("Album", back_populates="children")
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))

@@ -6,6 +6,7 @@ from main.model.image import Image
 from main.model.album import Album
 from main.model.post import Post
 from main.model.user import User
+from main.model.order import Order
 
 from main import app, db, login_manager
 
@@ -162,7 +163,7 @@ def admin_albums():
         new_data.append(tmp)
     return render_template('admin/albums.html', data=new_data)
 
-@app.route('/admin/album/<int:id>')
+@app.route('/admin/album/<int:id>', methods=['GET', 'POST'])
 @login_required
 def admin_album(id):
     data = Album.query.get(id)
