@@ -8,7 +8,6 @@
                 <th>Název</th>
                 <th>Obsah</th>
                 <th>Datum vytvoření</th>
-                <th>Akce</th>
             </tr>
         </thead>
         <tbody>
@@ -18,10 +17,6 @@
                 <td>{{ item.name }}</td>
                 <td>{{ item.content }}</td>
                 <td>{{ item.create_date }}</td>
-                <td class="d-flex">
-                    <form method="POST" action="/admin/post/{{ item.id }}"><button type="submit" class="btn btn-success pull-left"><i class="fa fa-pencil"></i></button></form>
-                    <form method="POST" action="/admin/post/{{ item.id }}/d"><button type="submit" class="btn btn-danger pull-right"><i class="fa fa-trash"></i></button></form>
-                </td>
             </tr>
             {% endfor %}
         </tbody>

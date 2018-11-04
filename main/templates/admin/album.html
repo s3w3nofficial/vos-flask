@@ -13,7 +13,7 @@
         <button class="btn btn-primary" type="submit">Odeslat</button>
     </form>
     <div class="row">
-        {% for item in data.gallery_image | reverse %}
+        {% for item in data.gallery_image %}
         <div class="col-md-3">
             <div class=" container hoverred">
                 <img class="img-thumbnail img" src="{{ item.url }}" alt="">

@@ -6,7 +6,7 @@
         {% for item in data %}
         <div class="col-md-3">
             <a href="/gallery/{{ item.id }}">
-                <img class="img-thumbnail" src="{{ item.gallery_image | first }}" alt="">
+                <img class="img-thumbnail" src="{{ item.url }}" alt="">
             </a>
         </div>
         {% endfor %}
